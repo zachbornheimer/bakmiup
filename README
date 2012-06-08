@@ -1,0 +1,10 @@
+bakmiup is a flexible local remote backup engine built using git at it's core.  
+This is very configurable even letting the organization change the branding.  This is licensed under the GPL v3.
+
+The copyright and license applys to all files included in the bakmiup repository.  Any external sources are cited and covered by their author's copyright and licensing rules.
+
+Copyright does not appear in the bakmiup engine as to preserve branding.
+
+Copyright 2012 Z. Bornheimer and Zysys.
+
+Note: This program requires the Rangarok Encryption Algorithm (in the parent directory [directory must contain: "using.png" and "Ragnarok.pm"] -- downloadable at http://zysys.org/ragnarok)
