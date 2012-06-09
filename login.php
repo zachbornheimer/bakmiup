@@ -27,7 +27,6 @@
                $p = $_REQUEST['dpassword'];
                $dp = $_REQUEST['dpassconf'];
 	    }
-echo 'perl ../ragnarok/Ragnarok.pm --generate=upass --username="' . $u . '" --password="' . $p . '" --returnusername';
             $uname = shell_exec(escapeshellcmd('perl ../ragnarok/Ragnarok.pm --generate=upass --username="' . $u . '" --password="' . $p . '" --returnusername'));
             $proof = shell_exec(escapeshellcmd('perl ../ragnarok/Ragnarok.pm --generate=upass --username="' . $u . '" --password="' . $p . '"'));
 	    if (isset($_REQUEST['l'])) {
@@ -51,6 +50,7 @@ echo 'perl ../ragnarok/Ragnarok.pm --generate=upass --username="' . $u . '" --pa
                         print "Username Exists.";
                     } else {
                         ob_start();
+                        mysql_query("INSERT INTO `" . $GLOBALS['userTable'] . "` (`username`, `proof`) VALUES ('" . mysql_real_escape_string($uname) . "', '" . mysql_real_escape_string($proof) . "');");
                         $system_command = 'useradd -d ' . getcwd() . '/' . $drive . mysql_real_escape_string($u) . '.git/ -m -g ' . $GLOBALS['linuxGroup'] . " -p " . system("perl -e 'print crypt(" . mysql_real_escape_string($p) . ", " . mysql_real_escape_string($u) . ")'") . ' ' . mysql_real_escape_string($u);
                         runCommandAsRoot($system_command);
                         setupGit(mysql_real_escape_string($u));

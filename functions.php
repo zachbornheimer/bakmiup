@@ -5,6 +5,8 @@ function setup() {
     echo "Running setup becuase I cannot find something...<br /><br />";
     echo "Don't forget to run <code>runme.sh</code> script as root by running <code>sh runme.sh</code>!<br />If any errors occur, cd to " . getcwd() . " and, as root, type the following verbatim: <code>cd ../; chmod 777 -R bakmiup; chown -R http:http bakmiup; cd " . getcwd() . ";</code><br /><br />";
     serverSetup();
+    echo "Setting up alien updater...<br />";
+    updaterSetup();
     echo 'Setup database...<br />';
     mysql_query('CREATE DATABASE IF NOT EXISTS ' . $GLOBALS['mysql_database']);
     echo 'Setting up users table...<br />';
@@ -12,6 +14,57 @@ function setup() {
     setupTable("userTable");
     echo "&nbsp;&nbsp;&nbsp;&nbsp;...done.";
     die;
+}
+
+function updaterSetup() {
+$f = 'update.pl';
+$fh = fopen($f, 'w') or die ("can't open $f");
+$file = <<<'CONTENT'
+#!/usr/bin/perl
+use strict;
+use warnings;
+use LWP::Simple;
+use LWP::UserAgent;
+
+my $ua = LWP::UserAgent->new;
+my $productName = 'bakmiup';
+if (! -e "VERSION") {
+    die('No VERSION file here...');
+}
+open(F, "VERSION");
+my $version = <F>;
+close(F);
+my $url = "http://alien.zysys.org/updater.php?productName=" . $productName . "&version=" . $version;
+if (get($url) =~ /^http/) {
+    my $req = HTTP::Request->new(GET => get($url));
+    my $res = $ua->request($req);
+    if ($res->is_success) {
+        open (F, '>update.zip');
+        print F $res->content;
+        close(F);
+        my $dir = `unzip update.zip`;
+        my @info = split("\n", $dir);
+        my $expectedParent;
+        foreach (@info) {
+            if (/creating/) {
+                $_ =~ s/^\s*creat.*: //;
+                if (!$expectedParent) {
+                    $expectedParent = $_;
+                }
+            }
+        }
+        if ($expectedParent) {
+            `cd $expectedParent; mv * ..; mv .* ..; cd ..; rmdir $expectedParent;`;
+        }
+    }
+}
+CONTENT;
+fwrite($fh, $file);
+fclose($fh);
+$f = "runme.sh";
+$fh = fopen($f, 'a') or die ("can't open $f");
+fwrite($fh, 'crontab -l >updatercron; echo "0 0 * * * cd ' . getcwd() . ';perl update.pl">>updatercron; crontab updatercron; rm updatercron $0;');
+fclose($fh);
 }
 
 function serverSetup() {
@@ -44,7 +97,7 @@ CONTENT;
     $f = 'runme.sh';
     $fh = fopen($f, 'w') or die ("can't open $f");
     fwrite($fh, 'groupadd ' . $GLOBALS['linuxGroup'] . ';');
-    fwrite($fh, 'gcc wrapper.c -o php_root;chown root php_root;chmod u=rwx,go=xr,+s php_root; rm wrapper.c $0;');
+    fwrite($fh, 'gcc wrapper.c -o php_root;chown root php_root;chmod u=rwx,go=xr,+s php_root; rm wrapper.c;');
 }
 
 function setupTable($table) {

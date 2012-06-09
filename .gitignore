@@ -2,3 +2,4 @@ configuration.php
 drive/*
 download/*
 php_root
+update.pl
