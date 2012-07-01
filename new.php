@@ -1,11 +1,18 @@
 <?php
 require_once('configuration.php');
 require_once('functions.php');
+require_once('auth.php');
 ob_start();
 if (isset($_REQUEST['download'])) {
     $exclusionArray = array('*.' . $GLOBALS['brandname'] . '_patch');
     if (!(@$_REQUEST['gitignoreExclusion'])) {
         $exclusionArray[] = '!.gitignore';
+    }
+    if (@$_REQUEST['appVista']) {
+        $exclusionArray[] = 'AppData/';
+    }
+    if (@$_REQUEST['appXP']) {
+        $exclusionArray[] = 'Local Settings/';
     }
     if (@$_REQUEST['libraryExclusion']) {
         $exclusionArray[] = 'Library/';
@@ -19,6 +26,8 @@ if (isset($_REQUEST['download'])) {
     if (@$_REQUEST['hiddenExclusion']) {
         $exclusionArray[] = '.*';
     }
+    $exclusionArray[] = "ntuser.dat*";
+    $exclusionArray[] = "NTUSER.DAT*";
     $i = 1;
     while (@$_REQUEST['exclusion' . $i]) {
         if ($_REQUEST['exclusion' . $i] != "") {
@@ -27,7 +36,10 @@ if (isset($_REQUEST['download'])) {
         $i++;
     }
     if (isset($_REQUEST['mac']) || isset($_REQUEST['linux'])) {
-        $available = generateMac($exclusionArray); 
+        $available = generateOSCode($exclusionArray, false); 
+    }
+    if (isset($_REQUEST['win'])) {
+        $available = generateOSCode($exclusionArray, true);
     }
 
 }
@@ -68,7 +80,9 @@ if (isset($available)) {
 <input type="checkbox" name="iTunesExclusion" value="1" checked>&nbsp;iTunes</input>
 <input type="checkbox" name="trashExclusion" value="1" checked>&nbsp;Trash</input>
 <input type="checkbox" name="hiddenExclusion" value="1" checked>&nbsp;Hidden Files and Directories (not including .gitignore)</input>
-<input type="checkbox" name="gitignoreExclusion value="1">&nbsp;.gitignore</input>
+<input type="checkbox" name="gitignoreExclusion" value="1">&nbsp;.gitignore</input>
+<input type="checkbox" name="appVista" value="1" checked>&nbsp;AppData</input>
+<input type="checkbox" name="appXP" value="1" checked>&nbsp;Local Settings</input>
 <br /><br />
 <h3>Additional Exclusions:</h3>
 <span style="font-style: italic">Add each folder followed by a slash.  Files can be inputted as well.  Example: <code>iTunes/</code> or <code>Thumbs.db</code></span>
@@ -102,6 +116,7 @@ function generate_link() {
 <ul>
 <li><input type="submit" name="mac" value="Download the Mac Software" /></li>
 <li><input type="submit" name="linux" value="Download the Linux Software" /></li>
+<li><input type="submit" name="win" value="Download the Windows Software" /></li>
 </ul>
 </div>
 </form>
