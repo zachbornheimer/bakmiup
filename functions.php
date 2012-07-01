@@ -138,19 +138,32 @@ function setupSSH($u) {
     runCommandAsRoot(' su - ' . $u . ' -c " mkdir -p ~/.ssh;  ssh-keygen -q -t rsa -N ' . "''" . '  -f ~/.ssh/id_rsa;"');
 }
 
-function generateMac($exclusionArray) {
+function generateOSCode($exclusionArray, $win) {
     runCommandAsRoot('mkdir /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chmod 777 /tmp' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown http:http ' . $GLOBALS['linuxGroup'] . ' /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
     $original_location = getcwd(); 
     runCommandAsRoot('chmod 0755 /tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']]); 
     chdir('/tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);  
-    $f = 'writeit.sh';
+    if (!$win) {
+        $f = 'writeit.sh';
+    } else {
+        $f = 'writeit.bat';
+    }
     $fh = fopen($f, 'w') or die ("can't open $f"); 
+    if (!$win) {
     fwrite($fh, '#!/bin/bash' . "\n");
     fwrite($fh, 'servername='.$GLOBALS['brandname'].";\n");
     fwrite($fh, 'shfile=${servername}_setup.sh;'."\n");   
     fwrite($fh, 'username='.$_COOKIE[$GLOBALS['cookieName']].";\n");  
     fwrite($fh, 'server='.$GLOBALS['server'].";\n");  
-    fwrite($fh, 'port='.$GLOBALS['port'].";\n");  
+    fwrite($fh, 'port='.$GLOBALS['port'].";\n"); 
+    } else {
+    fwrite($fh, '@echo off' . "\n");
+    fwrite($fh, 'set servername='.$GLOBALS['brandname']."\n");
+    fwrite($fh, 'set shfile=%servername%_setup.bat'."\n");
+    fwrite($fh, 'set username='.$_COOKIE[$GLOBALS['cookieName']]."\n");
+    fwrite($fh, 'set server='.$GLOBALS['server']."\n");
+    fwrite($fh, 'set port='.$GLOBALS['port']."\n");
+    } 
     $rest = <<<'END_REST'
 original_path=$(pwd);
 cd ~;
@@ -160,24 +173,25 @@ mkdir -p $HOME/.ssh;
 END_REST;
 if (!empty($exclusionArray)) {
     foreach ($exclusionArray as $val) {
-        $rest .= "echo '$val' >> .gitignore\n";
+        $gitignore .= "echo $val>>.gitignore\n";
     }
 }
+$rest .= $gitignore;
 $rest .= <<<'END_REST'
 mkdir ${servername}_$username;
 cd ${servername}_$username;
 echo cd $home_path >$shfile
 echo scp -P $port -rv . ${username}@${server}: >>$shfile
-echo 'if [ ! -f $HOME/.ssh/zysys_bakup_rsa ]; then
-         ssh-keygen -t rsa -N "" -q -f ~/.ssh/zysys_bakup_rsa
+echo 'if [ ! -f $HOME/.ssh/id_rsa ]; then
+         ssh-keygen -t rsa -N "" -q -f ~/.ssh/id_rsa
       fi' >>$shfile
-echo "cat $HOME/.ssh/zysys_bakup_rsa.pub | ssh ${username}@${server} -p $port 'cat >> .ssh/authorized_keys'" >>$shfile
-echo "ssh-add $HOME/.ssh/zysys_bakup_rsa" >>$shfile
+echo "cat '$HOME/.ssh/id_rsa.pub' | ssh ${username}@${server} -p $port 'cat >> .ssh/authorized_keys'" >>$shfile
+echo "ssh-add $HOME/.ssh/id_rsa" >>$shfile
 echo "if [ -f $HOME/.gitignore ]; then
       cat $HOME/.gitignore | ssh ${username}@${server} -p $port 'cat >> .gitignore'
       fi" >>$shfile
-echo "cat ~/.ssh/zysys_bakup_rsa.pub | ssh ${username}@${server} -p $port 'cat >> .ssh/authorized_keys'" >>$shfile
-echo "ssh-add $HOME/.ssh/zysys_bakup_rsa" >>$shfile 
+echo "cat ~/.ssh/id_rsa.pub | ssh ${username}@${server} -p $port 'cat >> .ssh/authorized_keys'" >>$shfile
+echo "ssh-agent ssh-add $HOME/.ssh/id_rsa" >>$shfile 
 echo git init >>$shfile
 echo 'git add . -v' >>$shfile;
 echo 'git commit -am "Initial Commit."' >>$shfile;
@@ -195,6 +209,55 @@ echo 'cd $path' >>run.sh
 sh $shfile;
 rm $0;
 END_REST;
+
+if ($win) {
+$rest = <<<'END_REST'
+set original_path=%CD%
+set home_path=%HOMEDRIVE%%HOMEPATH%
+cd %home_path%
+IF NOT EXIST .ssh md .ssh
+
+END_REST;
+$rest .= $gitignore;
+$rest .= <<<'END_REST'
+IF NOT EXIST %servername%_%username% md %servername%_%username%
+cd "%servername%_%username%"
+echo @echo off>%shfile%
+echo cd "%home_path%" >>%shfile%
+echo cd "%home_path%\.ssh\" >>%shfile%
+echo IF NOT EXIST id_rsa ssh-keygen -t rsa -N "" -q -f "%home_path%\.ssh\id_rsa">>%shfile%
+echo type id_rsa.pub ^| ssh %username%@%server% -p %port% "cat >> .ssh/authorized_keys" >>%shfile%
+echo cd .. >>%shfile%
+echo scp -P %port% -rv . %username%@%server%: >>%shfile%
+echo ssh-agent ssh-add "%home_path%/.ssh/id_rsa" >>%shfile%
+echo schtasks /Create /SC HOURLY /tr "%home_path%/%servername%_%username%/runer.vbs" /TN %servername% >>%shfile%
+echo IF NOT EXIST .git git init >>%shfile%
+echo cd "%servername%_%username%" >>%shfile%
+echo part1.bat >>%shfile%
+echo @echo off >part1.bat
+echo set original_path=%%CD%% >>part1.bat
+echo cd "%home_path%\%servername%_%username%" >>part1.bat
+echo set main_path=%%CD%% >>part1.bat
+echo cd "%home_path%" >>part1.bat
+echo git.exe init . >>part1.bat
+echo cd "%%main_path%%" >>part1.bat
+echo run.bat >>part1.bat
+echo @echo off >run.bat
+echo set origpath=%%CD%% >>run.bat
+echo cd "%home_path%" >>run.bat
+echo git.exe add . -v >>run.bat
+echo git.exe commit -am "Backup for: %%date%% %%time%%" >>run.bat
+echo ssh %username%@%server% -p %port% "'git init; git add . -v; git commit -am" '"Initial Commit."'"'" >>%shfile%
+echo for /f "delims=" %%a in ('git.exe format-patch master -1 --suffix=.%servername%_patch') do @ssh %username%@%server% -p %port% 'cat >currPatch.%servername%_patch; git apply currPatch.%servername%_patch; rm -R *.%servername%_patch;' >>run.bat
+echo cd %%origpath%% >>run.bat 
+echo Set WshShell = CreateObject("WScript.Shell") >runner.vbs
+echo WshShell.Run chr(34) ^& "%home_path%\%servername%_%username%\run.bat" ^& Chr(34),0 >>runner.vbs
+echo Set WshShell = Nothing >>runner.vbs
+%shfile%
+END_REST;
+}
+
+
     fwrite($fh, $rest);
     fclose($fh);
     chdir($original_location);
