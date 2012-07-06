@@ -27,9 +27,10 @@ $GLOBALS['linuxGroup'] = 'bakmiupers';
 $GLOBALS['drive'] = 'drive/'; # trail with a / and it must be in the same dir
 
 # UI Preferences
-global $brandname, $logo; 
+global $brandname, $logo, $registrationOpen; 
 $GLOBALS['brandname'] = 'bakmiup';
 $GLOBALS['logo'] = 'images/bakmiup.png';
+$GLOBALS['registrationOpen'] = false; # Is Registration Open?
 
 # SSH Server Settings
 global $server, $port;

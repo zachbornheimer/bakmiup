@@ -105,6 +105,7 @@ if (isset($error)) {
 &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
 </td>
 <td>
+<?php if ($GLOBALS['registrationOpen']) { ?>
 <div id="register">
 <h2>Register</h2>
 <form method="post" action="">
@@ -121,6 +122,7 @@ if (isset($error)) {
 <input type=submit name=r value="Register" />
 </form>
 </div>
+<?php } ?>
 </td>
 </tr>
 </table>

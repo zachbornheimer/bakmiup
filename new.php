@@ -5,42 +5,50 @@ require_once('auth.php');
 ob_start();
 if (isset($_REQUEST['download'])) {
     $exclusionArray = array('*.' . $GLOBALS['brandname'] . '_patch');
-    if (!(@$_REQUEST['gitignoreExclusion'])) {
+    if (!(@$_REQUEST['gitignoreExclusion']))
         $exclusionArray[] = '!.gitignore';
-    }
-    if (@$_REQUEST['appVista']) {
-        $exclusionArray[] = 'AppData/';
-    }
-    if (@$_REQUEST['appXP']) {
-        $exclusionArray[] = 'Local Settings/';
-    }
-    if (@$_REQUEST['libraryExclusion']) {
-        $exclusionArray[] = 'Library/';
-    }
-    if (@$_REQUEST['iTunesExclusion']) {
+
+    if (@$_REQUEST['appVista'])
+        if (isset($_REQUEST['win']))
+            $exclusionArray[] = 'AppData/';
+
+    if (@$_REQUEST['appXP'])
+        if (isset($_REQUEST['win']))
+            $exclusionArray[] = 'Local Settings/';
+
+    if (@$_REQUEST['libraryExclusion'])
+        if (isset($_REQUEST['mac']))
+            $exclusionArray[] = 'Library/';
+
+    if (@$_REQUEST['iTunesExclusion'])
         $exclusionArray[] = 'iTunes/';
-    }
-    if (@$_REQUEST['trashExclusion']) {
-        $exclusionArray[] =  '.Trash/';
-    }
-    if (@$_REQUEST['hiddenExclusion']) {
+
+    if (@$_REQUEST['trashExclusion'])
+        if (isset($_REQUEST['mac']))
+            $exclusionArray[] =  '.Trash/';
+
+    if (@$_REQUEST['hiddenExclusion'])
         $exclusionArray[] = '.*';
+
+    if (isset($_REQUEST['win'])) {
+        $exclusionArray[] = "ntuser.dat*";
+        $exclusionArray[] = "NTUSER.DAT*";
+        $exclusionArray[] = "ntuser.ini*";
+        $exclusionArray[] = "NTUSER.INI*";
     }
-    $exclusionArray[] = "ntuser.dat*";
-    $exclusionArray[] = "NTUSER.DAT*";
     $i = 1;
+
     while (@$_REQUEST['exclusion' . $i]) {
-        if ($_REQUEST['exclusion' . $i] != "") {
+        if ($_REQUEST['exclusion' . $i] != "")
             $exclusionArray[] = $_REQUEST['exclusion' . $i];
-        }
         $i++;
     }
-    if (isset($_REQUEST['mac']) || isset($_REQUEST['linux'])) {
+
+    if (isset($_REQUEST['mac']) || isset($_REQUEST['linux']))
         $available = generateOSCode($exclusionArray, false); 
-    }
-    if (isset($_REQUEST['win'])) {
+
+    if (isset($_REQUEST['win']))
         $available = generateOSCode($exclusionArray, true);
-    }
 
 }
 ob_end_clean();
