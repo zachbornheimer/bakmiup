@@ -72,7 +72,7 @@ code {
 <div id="note">
 Note: This assumes that git is already installed.  If it is not, navigate to <a href="http://git-scm.com">git-scm.com</a> and install it before continuing.<br />
 Be aware, only one computer can be linked to each account. One computer is permanently assigned to one account.  This is to prevent accedental file transfer problems and prevent security breaches.
-</div>
+<br /><br />If possible, run the scripts as an Administrator or as a Super User as to prevent unexpected permission errors during the initial setup and during the scheduled execution phase.</div>
 <?php
 if (isset($available)) {
     ?>
