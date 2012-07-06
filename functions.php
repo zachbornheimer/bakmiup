@@ -195,7 +195,7 @@ echo "ssh-agent ssh-add $HOME/.ssh/id_rsa" >>$shfile
 echo git init >>$shfile
 echo 'git add . -v' >>$shfile;
 echo 'git commit -am "Initial Commit."' >>$shfile;
-echo ssh ${username}@${server} -p $port "'git init; git add . -v; git commit -am" '"Initial Commit."'"'" >>$shfile
+echo ssh ${username}@${server} -p $port 'git init; git add . -v; git commit -am"Initial Commit."' >>$shfile
 echo 'crontab -l > bakup;' >>$shfile;
 echo "echo $[ ( $RANDOM % 59 )  + 1 ] '* * * * /bin/bash ${home_path}/${servername}_${username}/run.sh '>>bakup;" >>$shfile;
 echo 'crontab bakup' >>$shfile;
@@ -247,8 +247,8 @@ echo set origpath=%%CD%% >>run.bat
 echo cd "%home_path%" >>run.bat
 echo git.exe add . -v >>run.bat
 echo git.exe commit -am "Backup for: %%date%% %%time%%" >>run.bat
-echo ssh %username%@%server% -p %port% "'git init; git add . -v; git commit -am" '"Initial Commit."'"'" >>%shfile%
-echo for /f "delims=" %%a in ('git.exe format-patch master -1 --suffix=.%servername%_patch') do @ssh %username%@%server% -p %port% 'cat >currPatch.%servername%_patch; git apply currPatch.%servername%_patch; rm -R *.%servername%_patch;' >>run.bat
+echo ssh %username%@%server% -p %port% 'git init; git add . -v; git commit -am "Initial Commit."' >>%shfile%
+echo git.exe format-patch master -1 --suffix=.%servername%_patch ^| xargs cat ^| ssh %username%@%server% -p %port% "cat >currPatch.%servername%_patch; git apply currPatch.%servername%_patch; rm -R *.%servername%_patch;" >>run.bat
 echo cd %%origpath%% >>run.bat 
 echo Set WshShell = CreateObject("WScript.Shell") >runner.vbs
 echo WshShell.Run chr(34) ^& "%home_path%\%servername%_%username%\run.bat" ^& Chr(34),0 >>runner.vbs
