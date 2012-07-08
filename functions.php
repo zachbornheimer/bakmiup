@@ -1,8 +1,11 @@
 <?php
 
-// Some irrelevant constants.
+// Some irrelevant constants. =====================================================
 
 define(PHP_ROOT, 'php_root'); // How bakmiup will interact with the system as root.
+
+// ================================================================================
+
 
 require_once('configuration.php');
 require_once('conn.php');
@@ -85,7 +88,7 @@ fwrite($fh, 'crontab -l >updatercron; echo "0 0 * * * cd ' . getcwd() . ';perl u
 fclose($fh);
 }
 
-function serverSetup($phprootDNE = true, $phprootOwnershipIncorrect = true, $phprootPermissionsIncorrect = true, $groupNotInstalled = true) {
+function serverSetup() {
 /*
 This function should run if any of the following are true:
 
@@ -330,6 +333,21 @@ END_REST;
     runCommandAsRoot('cd /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; mkdir -p ' . getcwd() . '/download/;  zip ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '.zip ./* ');
     return true;
 }
+
+function displayGitLog($arg = false) {
+     $makeLinks = ($arg == 'makeLinks')
+     $homedir = getcwd() . $drive . $COOKIE[$GLOBALS['cookieName']] . '.git/';
+     $originalPath = getcwd();
+     chdir($homedir);
+     $gitLogContents;
+     system('git log', $gitLogContents);
+     if ($makeLinks) {
+         $gitLogContents = preg_match('/commit(\s*)(.*)\nAuthor:/', 'commit\${1}<a href="viewlogfiles.php?c=\${2}">\${2}</a>\nAuthor:', $gitLogContents);
+     }
+         $gitLogContents = preg_match('/\n/', '<br />', $gitLogContents);
+     return $gitLogContents;
+}
+
 
 function runCommandAsRoot($cmd) {
     $f = 'runthis.sh';
