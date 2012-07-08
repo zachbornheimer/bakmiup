@@ -127,5 +127,5 @@ if (isset($error)) {
 </tr>
 </table>
 <div id="logo" style="position:fixed;bottom:5px; right: 5px;">
-<img src="../ragnarok/logo/using.png" alt="Ragnarok Encryption Used Here" />
+<img src="../ragnarok/using.png" alt="Ragnarok Encryption Used Here" />
 </div>

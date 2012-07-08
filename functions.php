@@ -1,11 +1,16 @@
 <?php
+
+// Some irrelevant constants.
+
+define(PHP_ROOT, 'php_root'); // How bakmiup will interact with the system as root.
+
 require_once('configuration.php');
 require_once('conn.php');
 function setup() {
     echo "Running setup becuase I cannot find something...<br /><br />";
-    echo "Don't forget to run <code>runme.sh</code> script as root by running <code>sh runme.sh</code>!<br />If any errors occur, cd to " . getcwd() . " and, as root, type the following verbatim: <code>cd ../; chmod 777 -R bakmiup; chown -R http:http bakmiup; cd " . getcwd() . ";</code><br /><br />";
+    echo "If any errors occur, cd to " . getcwd() . " and, as root, type the following verbatim: <code>cd ../; chmod 777 -R bakmiup; chown -R " . system("whoami") . ":" . system("whoami") . " bakmiup; cd " . getcwd() . ";</code><br /><br />";
     serverSetup();
-    echo "Setting up alien updater...<br />";
+    echo "Setting up the alien updater...<br />";
     updaterSetup();
     echo 'Setup database...<br />';
     mysql_query('CREATE DATABASE IF NOT EXISTS ' . $GLOBALS['mysql_database']);
@@ -17,7 +22,7 @@ function setup() {
 }
 
 function updaterSetup() {
-$f = 'update.pl';
+$f = 'updater.pl';
 $fh = fopen($f, 'w') or die ("can't open $f");
 $file = <<<'CONTENT'
 #!/usr/bin/perl
@@ -42,7 +47,20 @@ if (get($url) =~ /^http/) {
         open (F, '>update.zip');
         print F $res->content;
         close(F);
-        my $dir = `unzip update.zip`;
+        my $overwriteUpdatedFiles = 1;
+        open (F, 'configuration.php');
+        while(<F>) {
+            if ($_ =~ /overwriteUpdatedFiles/) {
+                $_ =~ s/.*=\s*(.);/$1/;
+                $overwriteUpdatedFile = $_;
+            }
+        }
+        close(F);
+        if ($overwriteUpdatedFiles) {
+            my $dir = `unzip -o update.zip`;
+        } else {
+            my $dir = `unzip update.zip`;
+        }
         my @info = split("\n", $dir);
         my $expectedParent;
         foreach (@info) {
@@ -67,10 +85,31 @@ fwrite($fh, 'crontab -l >updatercron; echo "0 0 * * * cd ' . getcwd() . ';perl u
 fclose($fh);
 }
 
-function serverSetup() {
-    $f = 'wrapper.c';
-    $fh = fopen($f, 'w') or die ("can't open $f");
-    $file = <<<'CONTENT'
+function serverSetup($phprootDNE = true, $phprootOwnershipIncorrect = true, $phprootPermissionsIncorrect = true, $groupNotInstalled = true) {
+/*
+This function should run if any of the following are true:
+
+1) PHP_ROOT is missing
+2) ownership on PHP_ROOT is incorrect
+3) permissions on PHP_ROOT are incorrect
+4) the group (default: bakmiupers) is not installed.
+
+==================================================================
+Version 0.0.0.2 fixes the bug where an individual can
+prevent access to bakmiup by repeatedly calling the setup script.
+
+Note: The setup script will run, but only to do the bare minimum.
+      It will check php_root primarily and adjust what it needs
+      to adjust (ownership, permissions, and existance)...although
+      it will also install the linux group for the bakmiup users.
+==================================================================
+
+*/
+    $phprootDNE = !file_exists(PHP_ROOT);
+    if ($phprootDNE) {
+        $f = 'wrapper.c';
+        $fh = fopen($f, 'w') or die ("can't open $f");
+        $file = <<<'CONTENT'
   #include <stdlib.h>
   #include <sys/types.h>
   #include <unistd.h>
@@ -92,12 +131,38 @@ function serverSetup() {
      return 0;
    }
 CONTENT;
-    fwrite($fh, $file);
-    fclose($fh);
-    $f = 'runme.sh';
-    $fh = fopen($f, 'w') or die ("can't open $f");
-    fwrite($fh, 'groupadd ' . $GLOBALS['linuxGroup'] . ';');
-    fwrite($fh, 'gcc wrapper.c -o php_root;chown root php_root;chmod u=rwx,go=xr,+s php_root; rm wrapper.c;');
+        fwrite($fh, $file);
+        fclose($fh);
+    }
+
+    // Determine what needs to be done
+    system('egrep -i "^'. $GLOBALS['linuxGroup'] . '" /etc/group', $groupNotInstalled);
+    if (!$phprootDNE) {
+        $phprootPermissions;
+        // Following line derived from: http://www.itworld.com/nls_unix_fileattributes_060309
+        system("perl -e '" . '$mode = (stat("test"))[2];printf "%04o", $mode & 07777'."'", $phprootPermissions);
+        $phprootPermissionsIncorrect = !($phpRootPermissions == 6755);
+        $phprootOwner;
+        // Following line derived from: http://www.perlmonks.org/index.pl?node_id=638015
+        system("perl -e '" . 'perl -e '$uid = (stat "test")[4];$_ = getpwuid($uid);$_=~s/(.*)x($uid).*/$1/;$1/;print $_;' . "'", $phprootOwner);
+        $phprootOwnershipCorrect = ($phprootOwner == 'root');
+        $phprootOwnershipIncorrect = !$phprootOwnershipCorrect;
+    }
+    if ($phprootOwnershipIncorrect || $phprootPermissionsIncorrect || $groupNotInstalled) {
+        $f = 'runme.sh';
+        $fh = fopen($f, 'w') or die ("can't open $f");
+        if ($groupNotInstalled)
+            fwrite($fh, 'groupadd ' . $GLOBALS['linuxGroup'] . ';');
+        if ($phprootDNE)
+            fwrite($fh, 'gcc wrapper.c -o '.PHP_ROOT.';');
+        if ($phprootOwnershipIncorrect)
+            fwrite($fh, 'chown root '.PHP_ROOT.';');
+        if ($phprootPermissionsIncorrect)
+            fwrite($fh, 'chmod u=rwx,go=xr,+s '.PHP_ROOT.';');
+        if ($phpDNE)
+            fwrite($fh, 'rm wrapper.c;');
+        echo '<br />Don't forget to run <code>runme.sh</code> script as root by running <code>sh runme.sh</code>!<br />';
+    }
 }
 
 function setupTable($table) {
@@ -253,7 +318,7 @@ echo cd %%origpath%% >>run.bat
 echo Set WshShell = CreateObject("WScript.Shell") >runner.vbs
 echo WshShell.Run chr(34) ^& "%home_path%\%servername%_%username%\run.bat" ^& Chr(34),0 >>runner.vbs
 echo Set WshShell = Nothing >>runner.vbs
-%shfile%
+del %0
 END_REST;
 }
 
@@ -271,7 +336,7 @@ function runCommandAsRoot($cmd) {
     $fh = fopen($f, 'w') or die ("can't open $f");  
     fwrite($fh, $cmd);  
     fclose($fh);
-    system('./php_root');
+    system('./'.PHP_ROOT);
     unlink($f); 
 }
 ?>
