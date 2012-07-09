@@ -359,7 +359,7 @@ END_REST;
     fclose($fh);
     chdir($original_location);
     runCommandAsRoot('chmod -R 755 /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown -R ' . $_COOKIE[$GLOBALS['cookieName']] . ':' . $GLOBALS['linuxGroup'] . $GLOBALS['linuxGroup'] . ' /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]); 
-    runCommandAsRoot('cd /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; mkdir -p ' . getcwd() . '/download/;  zip ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '.zip ./* ');
+    runCommandAsRoot('rm '.getcwd().'/download/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zip;cd /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; mkdir -p ' . getcwd() . '/download/;  zip ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '.zip ./* ');
     return true;
 }
 
@@ -404,7 +404,7 @@ END_REST;
     fwrite($fh, $rest);
     fclose($fh);
     chdir($original_location);
-    runCommandAsRoot('chmod -R 755 /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown -R ' . $_COOKIE[$GLOBALS['cookieName']] . ':' . $GLOBALS['linuxGroup'] . $GLOBALS['linuxGroup'] . ' /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
+    runCommandAsRoot('rm '.getcwd().'/download/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'r.zip;chmod -R 755 /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown -R ' . $_COOKIE[$GLOBALS['cookieName']] . ':' . $GLOBALS['linuxGroup'] . $GLOBALS['linuxGroup'] . ' /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
     runCommandAsRoot('cd /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; mkdir -p ' . getcwd() . '/download/;  zip ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . 'r.zip ./* ');
     ob_end_clean();
     return true;
