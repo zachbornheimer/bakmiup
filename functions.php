@@ -14,7 +14,7 @@ function setup() {
     $message = '<div id="nav"><a href="index.php">Go to the '.$GLOBALS['brandname'].' home screen.</a></div>';
     $message .= serverSetup();
     $message .= "Running setup becuase I cannot find something or because something is broken...<br /><br />";
-    $message .= "If any errors occur, cd to " . getcwd() . " and, as root, type the following verbatim: <code>cd ../; chmod 777 -R bakmiup; chown -R " . system("whoami") . ":" . system("whoami") . " bakmiup; cd " . getcwd() . ";</code><br />";
+    $message .= "If any errors occur, cd to " . getcwd() . " and, as root, type the following verbatim: <code>cd ../; chmod 777 -R " . getcwd() ."; chown -R " . system("whoami") . ":" . system("whoami") . " " . getcwd() . "; cd " . getcwd() . ";</code><br />";
     ob_end_clean();    
     echo $message;
     if (!file_exists('updater.pl')) {
@@ -234,7 +234,9 @@ function setupSSH($u) {
 }
 
 function generateOSCode($exclusionArray, $win) {
-    runCommandAsRoot('mkdir /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chmod 777 /tmp' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown http:http ' . $GLOBALS['linuxGroup'] . ' /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
+    ob_start();
+    runCommandAsRoot('mkdir /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chmod 777 /tmp' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown '. system('whoami').':'.system('whoami'). ' ' . $GLOBALS['linuxGroup'] . ' /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
+    ob_end_clean();
     $original_location = getcwd(); 
     runCommandAsRoot('chmod 0755 /tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']]); 
     chdir('/tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);  
@@ -359,6 +361,54 @@ END_REST;
     runCommandAsRoot('chmod -R 755 /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown -R ' . $_COOKIE[$GLOBALS['cookieName']] . ':' . $GLOBALS['linuxGroup'] . $GLOBALS['linuxGroup'] . ' /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]); 
     runCommandAsRoot('cd /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; mkdir -p ' . getcwd() . '/download/;  zip ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '.zip ./* ');
     return true;
+}
+
+function generateRestoreScript($os) {
+    ob_start();
+    runCommandAsRoot('rm -R /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']].'/*;mkdir /tmp/r/; mkdir /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chmod 777 /tmp' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown '.system('whoami').':'.system('whoami') . ' /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
+    $original_location = getcwd();
+    runCommandAsRoot('chmod 0755 /tmp/r/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']]);
+    chdir('/tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
+    if ($os != 'win')
+        $f = 'restore.sh';
+    else
+        $f = 'restore.bat';
+    $fh = fopen($f, 'w') or die ("can't open $f");
+    if ($os != 'win') {
+    fwrite($fh, '#!/bin/bash' . "\n");
+    fwrite($fh, 'servername='.$GLOBALS['brandname'].";\n");
+    fwrite($fh, 'username='.$_COOKIE[$GLOBALS['cookieName']].";\n");
+    fwrite($fh, 'server='.$GLOBALS['server'].";\n");
+    fwrite($fh, 'port='.$GLOBALS['port'].";\n");
+    } else {
+    fwrite($fh, '@echo off' . "\n");
+    fwrite($fh, 'set servername='.$GLOBALS['brandname']."\n");
+    fwrite($fh, 'set username='.$_COOKIE[$GLOBALS['cookieName']]."\n");
+    fwrite($fh, 'set server='.$GLOBALS['server']."\n");
+    fwrite($fh, 'set port='.$GLOBALS['port']."\n");
+    }
+    if ($os != 'win') {
+        $rest = <<<'END_REST'
+cd %HOME%
+git pull ssh://${username}@${server}:${port}/~${username}
+rm $0
+END_REST;
+    } else {
+        $rest = <<<'END_REST'
+cd %HOME%
+git pull ssh://%username%@%server:%port%/~%username%
+del %0
+END_REST;
+    }
+
+    fwrite($fh, $rest);
+    fclose($fh);
+    chdir($original_location);
+    runCommandAsRoot('chmod -R 755 /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown -R ' . $_COOKIE[$GLOBALS['cookieName']] . ':' . $GLOBALS['linuxGroup'] . $GLOBALS['linuxGroup'] . ' /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
+    runCommandAsRoot('rm ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . 'r.zip; cd /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; mkdir -p ' . getcwd() . '/download/;  zip ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . 'r.zip ./* ');
+    ob_end_clean();
+    return true;
+
 }
 
 function displayGitLog($arg = false) {
