@@ -21,7 +21,6 @@
 */
     require_once('conn.php');
     require_once('configuration.php');
-    require_once('global_includes.php');
     require_once('functions.php');
     
     if (isset($_REQUEST['logout']) && !(isset($_REQUEST['l']) || isset($_REQUEST['r']))) {
