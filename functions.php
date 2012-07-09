@@ -235,7 +235,7 @@ function setupSSH($u) {
 
 function generateOSCode($exclusionArray, $win) {
     ob_start();
-    runCommandAsRoot('mkdir /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chmod 777 /tmp' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown '. system('whoami').':'.system('whoami'). ' ' . $GLOBALS['linuxGroup'] . ' /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
+    runCommandAsRoot('rm -R /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']].'/*;mkdir /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chmod 777 /tmp' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown '. system('whoami').':'.system('whoami'). ' ' . $GLOBALS['linuxGroup'] . ' /tmp/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
     ob_end_clean();
     $original_location = getcwd(); 
     runCommandAsRoot('chmod 0755 /tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']]); 
@@ -405,7 +405,7 @@ END_REST;
     fclose($fh);
     chdir($original_location);
     runCommandAsRoot('chmod -R 755 /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; chown -R ' . $_COOKIE[$GLOBALS['cookieName']] . ':' . $GLOBALS['linuxGroup'] . $GLOBALS['linuxGroup'] . ' /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']]);
-    runCommandAsRoot('rm ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . 'r.zip; cd /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; mkdir -p ' . getcwd() . '/download/;  zip ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . 'r.zip ./* ');
+    runCommandAsRoot('cd /tmp/r/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . '; mkdir -p ' . getcwd() . '/download/;  zip ' . getcwd() . '/download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . 'r.zip ./* ');
     ob_end_clean();
     return true;
 
