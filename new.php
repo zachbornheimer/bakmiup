@@ -89,8 +89,9 @@ code {
 <div id="nav">
 <a href="index.php">Go to the <?php echo $GLOBALS['brandname']; ?> home screen.</a>
 </div>
+<br />
 <div id="note">
-Note: This assumes that git is already installed.  If it is not, navigate to <a href="http://git-scm.com">git-scm.com</a> and install it before continuing.<br />
+Note: This assumes that git is already installed.  If it is not, navigate to <a href="http://git-scm.com">git-scm.com</a> and install it before continuing.  On Windows, you must install git with the option selected to overwrite windows tools (it will be the third option during installation), but use the defaults for everything else.<br />
 Be aware, only one computer can be linked to each account. One computer is permanently assigned to one account.  This is to prevent accedental file transfer problems and prevent security breaches.
 <br /><br />If possible, run the scripts as an Administrator or as a Super User as to prevent unexpected permission errors during the initial setup and during the scheduled execution phase.</div>
 <?php

@@ -26,13 +26,13 @@
 ?>
 <!doctype html>
 <head>
-<title>Backup Records</title>
+<title>Backup Log</title>
 </head>
 <body>
 <div id="nav">
 <a href="index.php">Go To the <?php echo $GLOBALS['brandname']; ?> home screen.</a>
 </div>
-<h1>Bakup Records</h1>
+<h1>Backup Log</h1>
 <p>Click on the link to display the files that were changed in that particular backup.</p>
 <pre>
 <?php echo displayGitLog('makeLinks'); ?>
