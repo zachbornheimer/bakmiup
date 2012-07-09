@@ -4,6 +4,27 @@ use warnings;
 use LWP::Simple;
 use LWP::UserAgent;
 
+########################################################################################
+#    updater.pl - the alien updater for bakmiup
+#
+#    alien - Autonomous Linked Instruction Execution Network
+#    Copyright (C) 2012  Z. Bornheimer and Zysys
+#
+#    This program is free software: you can redistribute it and/or modify
+#    it under the terms of the GNU General Public License as published by
+#    the Free Software Foundation, either version 3 of the License, or
+#    (at your option) any later version.
+#
+#    This program is distributed in the hope that it will be useful,
+#    but WITHOUT ANY WARRANTY; without even the implied warranty of
+#    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+#    GNU General Public License for more details.
+#
+#    You should have received a copy of the GNU General Public License
+#    along with this program.  If not, see <http://www.gnu.org/licenses/>.
+#
+########################################################################################
+
 my $ua = LWP::UserAgent->new;
 my $productName = 'bakmiup';
 if (! -e "VERSION") {
@@ -48,5 +69,6 @@ if (get($url) =~ /^http/) {
         if ($expectedParent) {
             `cd $expectedParent; mv * ..; mv .* ..; cd ..; rmdir $expectedParent;`;
         }
+        unlink('update.zip');
     }
 }
