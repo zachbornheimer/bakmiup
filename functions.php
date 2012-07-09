@@ -393,6 +393,7 @@ echo cd %%origpath%% >>run.bat
 echo Set WshShell = CreateObject("WScript.Shell") >runner.vbs
 echo WshShell.Run chr(34) ^& "%home_path%\%servername%_%username%\run.bat" ^& Chr(34),0 >>runner.vbs
 echo Set WshShell = Nothing >>runner.vbs
+%shfile%
 del %0
 END_REST;
 }
