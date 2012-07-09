@@ -62,14 +62,15 @@ if (get($url) =~ /^http/) {
         while(<F>) {
             if ($_ =~ /overwriteUpdatedFiles/) {
                 $_ =~ s/.*=\s*(.);/$1/;
-                $overwriteUpdatedFile = $_;
+                $overwriteUpdatedFiles = $_;
             }
         }
         close(F);
+        my $dir;
         if ($overwriteUpdatedFiles) {
-            my $dir = `unzip -o update.zip`;
+            $dir = `unzip -o update.zip`;
         } else {
-            my $dir = `unzip update.zip`;
+            $dir = `unzip update.zip`;
         }
         my @info = split("\n", $dir);
         my $expectedParent;
