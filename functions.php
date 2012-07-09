@@ -364,10 +364,10 @@ END_REST;
 function displayGitLog($arg = false) {
     $makeLinks = ($arg == 'makeLinks');
     $homedir = getcwd() . '/' . $GLOBALS['drive'] . $_COOKIE[$GLOBALS['cookieName']] . '.git/';
-    $originalPath = getcwd();
     $gitLogContents;
     runCommandAsRoot('cd '.$homedir.';git log >/tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
     $gitLogContents = file_get_contents('/tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
+    runCommandAsRoot('rm /tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
     if ($makeLinks) {
         $gitLogContents = preg_replace('/commit(\s*)(.*)\nAuthor:/', 'commit\1<a href="viewlogfiles.php?c=\2">\2</a>'."\n".'Author:', $gitLogContents);
      }
@@ -375,6 +375,13 @@ function displayGitLog($arg = false) {
     return $gitLogContents;
 }
 
+function displayChangedFilesInCommit($c) {
+    $homedir = getcwd() . '/' . $GLOBALS['drive'] . $_COOKIE[$GLOBALS['cookieName']] . '.git/';
+    runCommandAsRoot('cd '.$homedir.';git ls-tree --name-only -r '.$c.' >/tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
+    $displayChangedFiles = file_get_contents('/tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
+    runCommandAsRoot('rm /tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
+    return $displayChangedFiles;
+}
 
 function runCommandAsRoot($cmd) {
     $f = 'runthis.sh';

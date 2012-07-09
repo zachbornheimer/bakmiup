@@ -67,7 +67,7 @@ code {
 </style>
 </head>
 <div id="nav">
-<a href="index.php">Go To the bakmiup home screen.</a>
+<a href="index.php">Go to the <?php echo $GLOBALS['brandname']; ?> home screen.</a>
 </div>
 <div id="note">
 Note: This assumes that git is already installed.  If it is not, navigate to <a href="http://git-scm.com">git-scm.com</a> and install it before continuing.<br />
