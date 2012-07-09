@@ -1,9 +1,15 @@
 bakmiup is a flexible local remote backup engine built using git at it's core.  
-This is very configurable even letting the organization change the branding.  This is licensed under the GPL v3.
+This is very configurable even letting the organization change the branding.
 
-The copyright and license applys to all files included in the bakmiup repository.  Any external sources are cited and covered by their author's copyright and licensing rules.
+bakmiup is licensed under the GPL v3.
+alien is licensed under the GPL v3.
+
+Any 3rd pary software used is licenced by its creators or distributors.
+
+The copyright and license applys to all files included in the bakmiup repository (wherever possible).  Any external sources are cited and covered by their author's copyright and licensing rules.
 
 Copyright does not appear in the bakmiup engine as to preserve branding.
+If you decide to use bakmiup and refuse the GPL v3, you may modify ONLY the configuration file because the program would not function without it.
 
 Copyright 2012 Z. Bornheimer and Zysys.
 
