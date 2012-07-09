@@ -62,14 +62,15 @@ if (get($url) =~ /^http/) {
         while(<F>) {
             if ($_ =~ /overwriteUpdatedFiles/) {
                 $_ =~ s/.*=\s*(.);/$1/;
-                $overwriteUpdatedFile = $_;
+                $overwriteUpdatedFiles = $_;
             }
         }
         close(F);
+        my $dir;
         if ($overwriteUpdatedFiles) {
-            my $dir = `unzip -o update.zip`;
+            $dir = `unzip -o update.zip`;
         } else {
-            my $dir = `unzip update.zip`;
+            $dir = `unzip update.zip`;
         }
         my @info = split("\n", $dir);
         my $expectedParent;
@@ -95,7 +96,7 @@ CONTENT;
         else
             $f = "runme.sh";
         $fh = fopen($f, 'a') or die ("can't open $f");
-        fwrite($fh, 'crontab -l >updatercron; echo "0 0 * * * cd ' . getcwd() . ';perl update.pl">>updatercron; crontab updatercron; rm updatercron $0;');
+        fwrite($fh, 'crontab -l >updatercron; echo "0 0 * * * cd ' . getcwd() . ';sudo perl update.pl">>updatercron; crontab updatercron; rm updatercron $0;');
         fclose($fh);
         if (!$phprootDNE)
             system('./'.PHP_ROOT.';rm runthis.sh');
