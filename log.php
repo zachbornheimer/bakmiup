@@ -9,7 +9,7 @@
 </head>
 <body>
 <div id="nav">
-<a href="index.php">Go To the bakmiup home screen.</a>
+<a href="index.php">Go To the <?php echo $GLOBALS['brandname']; ?> home screen.</a>
 </div>
 <h1>Bakup Records</h1>
 <pre>

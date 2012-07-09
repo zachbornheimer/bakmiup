@@ -11,7 +11,8 @@ require_once('configuration.php');
 require_once('conn.php');
 function setup() {
     ob_start();
-$message = serverSetup();
+    $message = '<div id="nav"><a href="index.php">Go to the '.$GLOBALS['brandname'].' home screen.</a></div>';
+    $message .= serverSetup();
     $message .= "Running setup becuase I cannot find something or because something is broken...<br /><br />";
     $message .= "If any errors occur, cd to " . getcwd() . " and, as root, type the following verbatim: <code>cd ../; chmod 777 -R bakmiup; chown -R " . system("whoami") . ":" . system("whoami") . " bakmiup; cd " . getcwd() . ";</code><br />";
     ob_end_clean();    
@@ -28,8 +29,6 @@ $message = serverSetup();
     echo "&nbsp;&nbsp;&nbsp;&nbsp;...done.";
     die;
 }
-
-
 
 function updaterSetup() {
     if (!file_exists('updater.pl')) {
@@ -369,11 +368,10 @@ function displayGitLog($arg = false) {
     $gitLogContents;
     runCommandAsRoot('cd '.$homedir.';git log >/tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
     $gitLogContents = file_get_contents('/tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
-
     if ($makeLinks) {
-        $gitLogContents = preg_match('/commit(\s*)(.*)\nAuthor:/', 'commit\${1}<a href="viewlogfiles.php?c=\${2}">\${2}</a>\nAuthor:', $gitLogContents);
+        $gitLogContents = preg_replace('/commit(\s*)(.*)\nAuthor:/', 'commit\1<a href="viewlogfiles.php?c=\2">\2</a>'."\n".'Author:', $gitLogContents);
      }
-        $gitLogContents = preg_match('/\n/', '<br />', $gitLogContents);
+        $gitLogContents = preg_replace('/\n/', '<br />', $gitLogContents);
     return $gitLogContents;
 }
 
