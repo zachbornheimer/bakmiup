@@ -48,7 +48,7 @@
 <a href="restore.php?download&linux">Download the Linux Software</a><br />
 </div>
 <?php } else { ?>
-Make sure you put the files where they belong once you get them.
+Make sure you put the files where they belong once you get them.  Also makes sure to run the program as an administrator!
 <div id="ready">
 <ul><li><a href="<?php echo 'download/' . $GLOBALS['brandname'] . $_COOKIE[$GLOBALS['cookieName']] . 'r.zip'; ?>">The software is ready.  Get it now!</a></div></li></ul>
 
