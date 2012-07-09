@@ -1,7 +1,7 @@
 <?php
     require('configuration.php');
     require('conn.php');
-    if (!file_exists('php_root')) {
+    if (!file_exists('php_root') || !file_exists('updater.pl')) {
         setup();
         exit;
     }

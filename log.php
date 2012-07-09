@@ -13,7 +13,7 @@
 </div>
 <h1>Bakup Records</h1>
 <pre>
-<?php echo displayGitLog('makeLinks');
+<?php echo displayGitLog('makeLinks'); ?>
 </pre>
 </body>
 </html>

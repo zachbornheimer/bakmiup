@@ -2,7 +2,7 @@
 
 // Some irrelevant constants. =====================================================
 
-define(PHP_ROOT, 'php_root'); // How bakmiup will interact with the system as root.
+define('PHP_ROOT', 'php_root'); // How bakmiup will interact with the system as root.
 
 // ================================================================================
 
@@ -10,24 +10,32 @@ define(PHP_ROOT, 'php_root'); // How bakmiup will interact with the system as ro
 require_once('configuration.php');
 require_once('conn.php');
 function setup() {
-    echo "Running setup becuase I cannot find something...<br /><br />";
-    echo "If any errors occur, cd to " . getcwd() . " and, as root, type the following verbatim: <code>cd ../; chmod 777 -R bakmiup; chown -R " . system("whoami") . ":" . system("whoami") . " bakmiup; cd " . getcwd() . ";</code><br /><br />";
-    serverSetup();
-    echo "Setting up the alien updater...<br />";
-    updaterSetup();
-    echo 'Setup database...<br />';
+    ob_start();
+$message = serverSetup();
+    $message .= "Running setup becuase I cannot find something or because something is broken...<br /><br />";
+    $message .= "If any errors occur, cd to " . getcwd() . " and, as root, type the following verbatim: <code>cd ../; chmod 777 -R bakmiup; chown -R " . system("whoami") . ":" . system("whoami") . " bakmiup; cd " . getcwd() . ";</code><br />";
+    ob_end_clean();    
+    echo $message;
+    if (!file_exists('updater.pl')) {
+        echo "Setting up the alien updater...<br />";
+        updaterSetup();
+    }
+    echo 'Setting up the database, if necessary...<br />';
     mysql_query('CREATE DATABASE IF NOT EXISTS ' . $GLOBALS['mysql_database']);
-    echo 'Setting up users table...<br />';
+    echo 'Setting up users table, if necessary...<br />';
     mysql_select_db($GLOBALS['mysql_database']); 
     setupTable("userTable");
     echo "&nbsp;&nbsp;&nbsp;&nbsp;...done.";
     die;
 }
 
+
+
 function updaterSetup() {
-$f = 'updater.pl';
-$fh = fopen($f, 'w') or die ("can't open $f");
-$file = <<<'CONTENT'
+    if (!file_exists('updater.pl')) {
+        $f = 'updater.pl';
+        $fh = fopen($f, 'w') or die ("can't open $f");
+        $file = <<<'CONTENT'
 #!/usr/bin/perl
 use strict;
 use warnings;
@@ -80,12 +88,19 @@ if (get($url) =~ /^http/) {
     }
 }
 CONTENT;
-fwrite($fh, $file);
-fclose($fh);
-$f = "runme.sh";
-$fh = fopen($f, 'a') or die ("can't open $f");
-fwrite($fh, 'crontab -l >updatercron; echo "0 0 * * * cd ' . getcwd() . ';perl update.pl">>updatercron; crontab updatercron; rm updatercron $0;');
-fclose($fh);
+        fwrite($fh, $file);
+        fclose($fh);
+        $phprootDNE = !file_exists(PHP_ROOT);
+        if (!$phprootDNE)
+            $f = "runthis.sh";
+        else
+            $f = "runme.sh";
+        $fh = fopen($f, 'a') or die ("can't open $f");
+        fwrite($fh, 'crontab -l >updatercron; echo "0 0 * * * cd ' . getcwd() . ';perl update.pl">>updatercron; crontab updatercron; rm updatercron $0;');
+        fclose($fh);
+        if (!$phprootDNE)
+            system('./'.PHP_ROOT.';rm runthis.sh');
+    }
 }
 
 function serverSetup() {
@@ -137,19 +152,13 @@ CONTENT;
         fwrite($fh, $file);
         fclose($fh);
     }
-
     // Determine what needs to be done
     system('egrep -i "^'. $GLOBALS['linuxGroup'] . '" /etc/group', $groupNotInstalled);
     if (!$phprootDNE) {
-        $phprootPermissions;
-        // Following line derived from: http://www.itworld.com/nls_unix_fileattributes_060309
-        system("perl -e '" . '$mode = (stat("test"))[2];printf "%04o", $mode & 07777'."'", $phprootPermissions);
-        $phprootPermissionsIncorrect = !($phpRootPermissions == 6755);
-        $phprootOwner;
-        // Following line derived from: http://www.perlmonks.org/index.pl?node_id=638015
-        system("perl -e '" . 'perl -e '$uid = (stat "test")[4];$_ = getpwuid($uid);$_=~s/(.*)x($uid).*/$1/;$1/;print $_;' . "'", $phprootOwner);
-        $phprootOwnershipCorrect = ($phprootOwner == 'root');
-        $phprootOwnershipIncorrect = !$phprootOwnershipCorrect;
+        ob_start();
+        $phprootPermissionsIncorrect = !phprootPermissionsAreGood();
+        $phprootOwnershipIncorrect = !phprootOwnershipCorrect();
+        ob_end_flush();
     }
     if ($phprootOwnershipIncorrect || $phprootPermissionsIncorrect || $groupNotInstalled) {
         $f = 'runme.sh';
@@ -162,12 +171,31 @@ CONTENT;
             fwrite($fh, 'chown root '.PHP_ROOT.';');
         if ($phprootPermissionsIncorrect)
             fwrite($fh, 'chmod u=rwx,go=xr,+s '.PHP_ROOT.';');
-        if ($phpDNE)
+        if ($phprootDNE)
             fwrite($fh, 'rm wrapper.c;');
-        echo '<br />Don't forget to run <code>runme.sh</code> script as root by running <code>sh runme.sh</code>!<br />';
+        if (!file_exists('updater.pl'))
+            fwrite($fh, 'rm $0');
+        ob_start();
+        return "<br />Don't forget to run <code>runme.sh</code> script as root by running <code>sh runme.sh</code>!<br /><br />";
     }
+    return;
 }
 
+function phprootPermissionsAreGood() {
+    ob_start();
+    // Following line derived from: http://www.itworld.com/nls_unix_fileattributes_060309
+    $phprootPermissions = system("perl -e '" . '$mode = (stat("'.PHP_ROOT.'"))[2];printf "%04o", $mode & 07777'."'");
+    ob_end_clean();
+    return ($phprootPermissions == 6755);
+}
+
+function phprootOwnershipCorrect() {
+    ob_start();
+    // Following line derived from: http://www.perlmonks.org/index.pl?node_id=638015
+    $phprootOwner = system("perl -e '" . '$uid = (stat "test")[4];$_ = getpwuid($uid);$_=~s/(.*)x($uid).*/$1/;print;' . "'");
+    ob_end_clean();
+    return ($phprootOwner == 'root');
+}
 function setupTable($table) {
     switch ($table) {
         case "userTable":  
@@ -335,17 +363,18 @@ END_REST;
 }
 
 function displayGitLog($arg = false) {
-     $makeLinks = ($arg == 'makeLinks')
-     $homedir = getcwd() . $drive . $COOKIE[$GLOBALS['cookieName']] . '.git/';
-     $originalPath = getcwd();
-     chdir($homedir);
-     $gitLogContents;
-     system('git log', $gitLogContents);
-     if ($makeLinks) {
-         $gitLogContents = preg_match('/commit(\s*)(.*)\nAuthor:/', 'commit\${1}<a href="viewlogfiles.php?c=\${2}">\${2}</a>\nAuthor:', $gitLogContents);
+    $makeLinks = ($arg == 'makeLinks');
+    $homedir = getcwd() . '/' . $GLOBALS['drive'] . $_COOKIE[$GLOBALS['cookieName']] . '.git/';
+    $originalPath = getcwd();
+    $gitLogContents;
+    runCommandAsRoot('cd '.$homedir.';git log >/tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
+    $gitLogContents = file_get_contents('/tmp/'.$GLOBALS['brandname'].$_COOKIE[$GLOBALS['cookieName']].'.zylog');
+
+    if ($makeLinks) {
+        $gitLogContents = preg_match('/commit(\s*)(.*)\nAuthor:/', 'commit\${1}<a href="viewlogfiles.php?c=\${2}">\${2}</a>\nAuthor:', $gitLogContents);
      }
-         $gitLogContents = preg_match('/\n/', '<br />', $gitLogContents);
-     return $gitLogContents;
+        $gitLogContents = preg_match('/\n/', '<br />', $gitLogContents);
+    return $gitLogContents;
 }
 
 
