@@ -1,7 +1,8 @@
 <?php
-    require('configuration.php');
-    require('conn.php');
-    if (!file_exists('php_root') || !file_exists('updater.pl')) {
+    require_once('configuration.php');
+    require_once('conn.php');
+
+    if (!file_exists('php_root') || !file_exists('updater.pl') || !phprootPermissionsAreGood() || !phprootOwnershipCorrect()) {
         setup();
         exit;
     }
