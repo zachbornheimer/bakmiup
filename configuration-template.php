@@ -26,6 +26,11 @@ $GLOBALS['cookieName_auth'] = $GLOBALS['cookieName'] . '_auth';
 $GLOBALS['linuxGroup'] = 'bakmiupers';
 $GLOBALS['drive'] = 'drive/'; # trail with a / and it must be in the same dir
 
+// The following line must only stay in exactly the same syntax with a 0 or 1 as the value assigned.
+// Overwrite files during update (default is yes/1)
+$overwriteUpdatedFiles = 1;
+
+
 # UI Preferences
 global $brandname, $logo, $registrationOpen; 
 $GLOBALS['brandname'] = 'bakmiup';
