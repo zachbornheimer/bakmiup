@@ -31,7 +31,7 @@ require_once('configuration.php');
 require_once('conn.php');
 function setup() {
     ob_start();
-    $message = '<div id="nav"><a href="index.php">Go to the '.$GLOBALS['brandname'].' home screen.</a></div>';
+    $message = '<div id="nav"><a href="index.php">Go to the '.$GLOBALS['brandname'].' home screen.</a></div><br />';
     $message .= serverSetup();
     $message .= "Running setup becuase I cannot find something or because something is broken...<br /><br />";
     $message .= "If any errors occur, cd to " . getcwd() . " and, as root, type the following verbatim: <code>cd ../; chmod 777 -R " . getcwd() ."; chown -R " . system("whoami") . ":" . system("whoami") . " " . getcwd() . "; cd " . getcwd() . ";</code><br />";
