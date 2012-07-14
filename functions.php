@@ -267,8 +267,8 @@ function setupGit($repoName) {
         system("mkdir " . getcwd() . '/' . $GLOBALS['drive'] . $repoName . '.git');
     }
     system("mkdir " . getcwd() . '/' . $GLOBALS['drive'] . $repoName . '.git');
-    runCommandAsRoot('cd ' . getcwd() . '/' . $GLOBALS['drive'] . $repoName . '.git; git init');
-    runCommandAsRoot('chown -R ' . $repoName . ':' . $GLOBALS['linuxGroup'] . ' ' . getcwd() . '/' . $GLOBALS['drive'] . $repoName . '.git');
+    runCommandAsRoot('cd ' . getcwd() . '/' . $GLOBALS['drive'] . $repoName . '.git; git init --bare;');
+    runCommandAsRoot('chown -R ' . $repoName . ':' . $GLOBALS['linuxGroup'] . ' ' . getcwd() . '/' . $GLOBALS['drive'] . $repoName . '.git; chmod -R u+rw ' . getcwd() . '/' . $GLOBALS['drive'] . $repName . '.git');
     return true;
 }
 
@@ -321,7 +321,6 @@ $rest .= <<<'END_REST'
 mkdir ${servername}_$username;
 cd ${servername}_$username;
 echo cd $home_path >$shfile
-echo scp -P $port -rv . ${username}@${server}: >>$shfile
 echo 'if [ ! -f $HOME/.ssh/id_rsa ]; then
          ssh-keygen -t rsa -N "" -q -f ~/.ssh/id_rsa
       fi' >>$shfile
@@ -333,9 +332,11 @@ echo "if [ -f $HOME/.gitignore ]; then
 echo "cat ~/.ssh/id_rsa.pub | ssh ${username}@${server} -p $port 'cat >> .ssh/authorized_keys'" >>$shfile
 echo "ssh-agent ssh-add $HOME/.ssh/id_rsa" >>$shfile 
 echo git init >>$shfile
+echo git config --global pack.threads 1 >>$shfile
 echo 'git add . -v' >>$shfile;
 echo 'git commit -am "Initial Commit."' >>$shfile;
-echo ssh ${username}@${server} -p $port 'git init; git add . -v; git commit -am"Initial Commit."' >>$shfile
+echo git remote add $servername ssh://${username}@${server}:${port}/~${username} >>$shfile
+echo git push $servername master >>$shfile
 echo 'crontab -l > bakup;' >>$shfile;
 echo "echo $[ ( $RANDOM % 59 )  + 1 ] '* * * * /bin/bash ${home_path}/${servername}_${username}/run.sh '>>bakup;" >>$shfile;
 echo 'crontab bakup' >>$shfile;
@@ -344,7 +345,7 @@ echo 'path=$(pwd)' >run.sh
 echo cd $home_path >>run.sh
 echo git add . -v >>run.sh
 echo 'git commit -am "Backup for: `date`"' >>run.sh
-echo "cat" '`git format-patch master -1 --suffix=.'${servername}'_patch`' "| ssh ${username}@${server} -p $port ""'cat > currPatch.'${servername}.'_patch; git apply currPatch.'.${servername}'_patch; rm -R *.'${servername}'_patch;'" >>run.sh
+echo git push $servername master >>run.sh
 echo 'cd $path' >>run.sh 
 sh $shfile;
 rm $0;
@@ -368,9 +369,8 @@ echo cd "%home_path%\.ssh\" >>%shfile%
 echo IF NOT EXIST id_rsa ssh-keygen -t rsa -N "" -q -f "%home_path%\.ssh\id_rsa">>%shfile%
 echo type id_rsa.pub ^| ssh %username%@%server% -p %port% "cat >> .ssh/authorized_keys" >>%shfile%
 echo cd .. >>%shfile%
-echo scp -P %port% -rv . %username%@%server%: >>%shfile%
 echo ssh-agent ssh-add "%home_path%/.ssh/id_rsa" >>%shfile%
-echo schtasks /Create /SC HOURLY /tr "%home_path%/%servername%_%username%/runer.vbs" /TN %servername% >>%shfile%
+echo schtasks /Create /SC HOURLY /tr "%home_path%/%servername%_%username%/runer.vbs" /TN %servername%_%username% >>%shfile%
 echo IF NOT EXIST .git git init >>%shfile%
 echo cd "%servername%_%username%" >>%shfile%
 echo part1.bat >>%shfile%
@@ -380,6 +380,7 @@ echo cd "%home_path%\%servername%_%username%" >>part1.bat
 echo set main_path=%%CD%% >>part1.bat
 echo cd "%home_path%" >>part1.bat
 echo git.exe init . >>part1.bat
+echo git.exe remote add %servername% ssh://%username%@%server%:%port%/~%username% >>part1.bat
 echo cd "%%main_path%%" >>part1.bat
 echo run.bat >>part1.bat
 echo @echo off >run.bat
@@ -387,8 +388,7 @@ echo set origpath=%%CD%% >>run.bat
 echo cd "%home_path%" >>run.bat
 echo git.exe add . -v >>run.bat
 echo git.exe commit -am "Backup for: %%date%% %%time%%" >>run.bat
-echo ssh %username%@%server% -p %port% 'git init; git add . -v; git commit -am "Initial Commit."' >>%shfile%
-echo git.exe format-patch master -1 --suffix=.%servername%_patch ^| xargs cat ^| ssh %username%@%server% -p %port% "cat >currPatch.%servername%_patch; git apply currPatch.%servername%_patch; rm -R *.%servername%_patch;" >>run.bat
+echo git.exe push %servername% master >>run.bat
 echo cd %%origpath%% >>run.bat 
 echo Set WshShell = CreateObject("WScript.Shell") >runner.vbs
 echo WshShell.Run chr(34) ^& "%home_path%\%servername%_%username%\run.bat" ^& Chr(34),0 >>runner.vbs
@@ -434,13 +434,13 @@ function generateRestoreScript($os) {
     if ($os != 'win') {
         $rest = <<<'END_REST'
 cd %HOME%
-git pull ssh://${username}@${server}:${port}/~${username}
+git clone ssh://${username}@${server}:${port}/~${username}
 rm $0
 END_REST;
     } else {
         $rest = <<<'END_REST'
 cd %HOME%
-git pull ssh://%username%@%server:%port%/~%username%
+git clone ssh://%username%@%server:%port%/~%username%
 del %0
 END_REST;
     }
