@@ -215,8 +215,7 @@ CONTENT;
             fwrite($fh, 'chmod u=rwx,go=xr,+s '.PHP_ROOT.';');
         if ($phprootDNE)
             fwrite($fh, 'rm wrapper.c;');
-        if (!file_exists('updater.pl'))
-            fwrite($fh, 'rm $0');
+        fwrite($fh, 'rm $0');
         ob_start();
         return "<br />Don't forget to run <code>runme.sh</code> script as root by running <code>sh runme.sh</code>!<br /><br />";
     }
