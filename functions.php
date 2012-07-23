@@ -369,7 +369,7 @@ echo IF NOT EXIST id_rsa ssh-keygen -t rsa -N "" -q -f "%home_path%\.ssh\id_rsa"
 echo type id_rsa.pub ^| ssh %username%@%server% -p %port% "cat >> .ssh/authorized_keys" >>%shfile%
 echo cd .. >>%shfile%
 echo ssh-agent ssh-add "%home_path%/.ssh/id_rsa" >>%shfile%
-echo schtasks /Create /SC HOURLY /tr "%home_path%/%servername%_%username%/runer.vbs" /TN %servername%_%username% >>%shfile%
+echo schtasks /Create /SC HOURLY /tr '"%home_path%\%servername%_%username%\runer.vbs"' /TN %servername%_%username% >>%shfile%
 echo IF NOT EXIST .git git init >>%shfile%
 echo cd "%servername%_%username%" >>%shfile%
 echo part1.bat >>%shfile%
