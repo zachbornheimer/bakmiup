@@ -138,7 +138,7 @@ CONTENT;
         else
             $f = "runme.sh";
         $fh = fopen($f, 'a') or die ("can't open $f");
-        fwrite($fh, 'crontab -l >updatercron; echo "0 0 * * * cd ' . getcwd() . ';sudo perl update.pl">>updatercron; crontab updatercron; rm updatercron $0;');
+        fwrite($fh, 'crontab -l >updatercron; echo "0 0 * * * cd ' . getcwd() . ';sudo perl updater.pl">>updatercron; crontab updatercron; rm updatercron $0;');
         fclose($fh);
         if (!$phprootDNE)
             system('./'.PHP_ROOT.';rm runthis.sh');
