@@ -67,7 +67,7 @@ if (get($url) =~ /^http/) {
             }
         }
         if ($expectedParent) {
-            `cd $expectedParent; mv * ..; mv .* ..; cd ..; rmdir $expectedParent;`;
+            `cd $expectedParent; cp -Rf * ..; cp -Rf .* ..; cd ..; rm -R $expectedParent;`;
         }
         unlink('update.zip');
     }
