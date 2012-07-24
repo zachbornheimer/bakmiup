@@ -35,3 +35,7 @@ require_once('auth.php');
 <a href="http://www.gnu.org/licenses/gpl-3.0-standalone.html"><?php echo $GLOBALS['brandname']; ?> is licensed via the GPL v3</a><br />
 Copyright &copy; Z. Bornheimer and Zysys.
 </div>
+<br />
+<div id="version">
+version <?php echo file_get_contents("VERSION"); ?>
+</div>
