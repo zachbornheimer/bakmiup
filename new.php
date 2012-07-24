@@ -34,6 +34,10 @@ if (isset($_REQUEST['download'])) {
 
     if (@$_REQUEST['appXP'])
         if (isset($_REQUEST['win']))
+            $exclusionArray[] = 'Application Data/';
+
+    if (@$_REQUEST['localsettings'])
+        if (isset($_REQUEST['win']))
             $exclusionArray[] = 'Local Settings/';
 
     if (@$_REQUEST['libraryExclusion'])
@@ -107,11 +111,12 @@ if (isset($available)) {
 <h2>Exclusions:</h2>
 <input type="checkbox" name="libraryExclusion" value="1" checked>&nbsp;Library (Mac Only)</input>
 <input type="checkbox" name="iTunesExclusion" value="1" checked>&nbsp;iTunes</input>
-<input type="checkbox" name="trashExclusion" value="1" checked>&nbsp;Trash</input>
+<inpuut type="checkbox" name="trashExclusion" value="1" checked>&nbsp;Trash</input>
 <input type="checkbox" name="hiddenExclusion" value="1" checked>&nbsp;Hidden Files and Directories (not including .gitignore)</input>
 <input type="checkbox" name="gitignoreExclusion" value="1">&nbsp;.gitignore</input>
 <input type="checkbox" name="appVista" value="1" checked>&nbsp;AppData</input>
-<input type="checkbox" name="appXP" value="1" checked>&nbsp;Local Settings</input>
+<input type="checkbox" name="localsettings" value="1" checked>&nbsp;Local Settings</input>
+<input type="checkbox" name="appXP" value="1" checked>&nbsp;Application Data</input>
 <br /><br />
 <h3>Additional Exclusions:</h3>
 <span style="font-style: italic">Add each folder followed by a slash.  Files can be inputted as well.  Example: <code>iTunes/</code> or <code>Thumbs.db</code></span>

@@ -331,9 +331,11 @@ echo "if [ -f $HOME/.gitignore ]; then
 echo "cat ~/.ssh/id_rsa.pub | ssh ${username}@${server} -p $port 'cat >> .ssh/authorized_keys'" >>$shfile
 echo "ssh-agent ssh-add $HOME/.ssh/id_rsa" >>$shfile 
 echo git init >>$shfile
+echo git config --global pack.windowMemory 10m >>$shfile
 echo git config --global pack.threads 1 >>$shfile
 echo 'git add . -v' >>$shfile;
 echo 'git commit -am "Initial Commit."' >>$shfile;
+echo git remote rm $servername >>$shfile
 echo git remote add $servername ssh://${username}@${server}:${port}/~${username} >>$shfile
 echo git push $servername master >>$shfile
 echo 'crontab -l > bakup;' >>$shfile;
@@ -370,7 +372,6 @@ echo type id_rsa.pub ^| ssh %username%@%server% -p %port% "cat >> .ssh/authorize
 echo cd .. >>%shfile%
 echo ssh-agent ssh-add "%home_path%/.ssh/id_rsa" >>%shfile%
 echo schtasks /Create /SC HOURLY /tr '"%home_path%\%servername%_%username%\runer.vbs"' /TN %servername%_%username% >>%shfile%
-echo IF NOT EXIST .git git init >>%shfile%
 echo cd "%servername%_%username%" >>%shfile%
 echo part1.bat >>%shfile%
 echo @echo off >part1.bat
@@ -379,9 +380,12 @@ echo cd "%home_path%\%servername%_%username%" >>part1.bat
 echo set main_path=%%CD%% >>part1.bat
 echo cd "%home_path%" >>part1.bat
 echo git.exe init . >>part1.bat
+echo git.exe config --global pack.windowMemory 10m >>part1.bat
+echo git.exe config --global user.email "%username%@%username%" >>part1.bat
+echo git.exe remote rm %servername% >>part1.bat
 echo git.exe remote add %servername% ssh://%username%@%server%:%port%/~%username% >>part1.bat
 echo cd "%%main_path%%" >>part1.bat
-echo run.bat >>part1.bat
+echo start /low /b run.bat >>part1.bat
 echo @echo off >run.bat
 echo set origpath=%%CD%% >>run.bat
 echo cd "%home_path%" >>run.bat
@@ -390,7 +394,7 @@ echo git.exe commit -am "Backup for: %%date%% %%time%%" >>run.bat
 echo git.exe push %servername% master >>run.bat
 echo cd %%origpath%% >>run.bat 
 echo Set WshShell = CreateObject("WScript.Shell") >runner.vbs
-echo WshShell.Run chr(34) ^& "%home_path%\%servername%_%username%\run.bat" ^& Chr(34),0 >>runner.vbs
+echo WshShell.Run chr(34) ^& '"%home_path%\%servername%_%username%\run.bat"' ^& Chr(34),0 >>runner.vbs
 echo Set WshShell = Nothing >>runner.vbs
 %shfile%
 del %0
