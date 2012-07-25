@@ -50,6 +50,43 @@ function setup() {
     die;
 }
 
+function checkSpace($die = true) {
+    ob_start();
+    $cmd = <<<'ENDCOMMAND'
+perl -e '$var=`df \`pwd\``;$var=~s/.*Use%.*\n//;$var=~s/.*\s+(\d+)%.*/$1/gm;print $var;'
+ENDCOMMAND;
+    $df = system($cmd);
+    ob_end_clean();
+    if ($df == 100) {
+        print "Fatal Error: you're all out of space. Error Code: 1050";
+        if ($die)
+            exit;
+    }
+    $cmd = <<<'ENDCOMMAND'
+perl -e '$var=`df /var`;$var=~s/.*Use%.*\n//;$var=~s/.*\s+(\d+)%.*/$1/gm;print $var;'
+ENDCOMMAND;
+    ob_start();
+    $df = system($cmd);
+    ob_end_clean();
+    if ($df == 100) {
+        print "Fatal Error: you're all out of space. Error Code: 1095";
+        if ($die)
+            exit;
+    }
+    $cmd = 'perl -e ' . "'\$var=`df " . '"' . getcwd() . '/' . $GLOBALS['drive'];
+    $cmd .= <<<'ENDCOMMAND'
+"`;$var=~s/.*Use%.*\n//;$var=~s/.*\s+(\d+)%.*/$1/gm;print $var;'
+ENDCOMMAND;
+    ob_start();
+    $df = system($cmd);
+    ob_end_clean();
+    if ($df == 100) {
+        print "Fatal Error: you're all out of space. Error Code: 1257";
+        if ($die)
+            exit;
+    }
+}
+
 function updaterSetup() {
     if (!file_exists('updater.pl')) {
         $f = 'updater.pl';

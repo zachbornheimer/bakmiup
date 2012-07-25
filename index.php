@@ -22,7 +22,11 @@
 require_once('configuration.php');
 require_once('auth.php');
 ?>
+<head>
+<title><?php echo $GLOBALS['brandname'] . " main page"; ?></title>
+</head>
 <div id="logo"><img src="<?php echo $GLOBALS['logo']; ?>" alt="<?php echo $GLOBALS['brandname']; ?>" /></div>
+<div><?php checkSpace(false); ?></div>
 <ul>
 <li><a href="new.php">Backup this computer</a></li>
 <li><a href="log.php">View the Backup Log</a></li>
