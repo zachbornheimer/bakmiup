@@ -426,9 +426,9 @@ echo start /low /b run.bat >>part1.bat
 echo @echo off >run.bat
 echo set origpath=%%CD%% >>run.bat
 echo cd "%home_path%" >>run.bat
-echo start /low /b /wait git.exe add . -v >>run.bat
-echo start /low /b /wait git.exe commit -am "Backup for: %%date%% %%time%%" >>run.bat
-echo start /low /b /wait git.exe push %servername% master >>run.bat
+echo start /low /b /wait "" "%PROGRAMFILES(X86)%\Git\bin\git.exe" "add" "." "-v" >>run.bat
+echo start /low /b /wait "" "%PROGRAMFILES(X86)%\Git\bin\git.exe" "commit" "-am" "Backup for: %%date%% %%time%%"" >>run.bat
+echo start /low /b /wait "" "git.exe" "push" "%servername%" "master" >>run.bat
 echo cd %%origpath%% >>run.bat 
 echo Set WshShell = CreateObject("WScript.Shell") >runner.vbs
 echo WshShell.Run chr(34) ^& "%home_path%\%servername%_%username%\run.bat" ^& Chr(34),0 >>runner.vbs
