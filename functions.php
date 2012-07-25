@@ -426,12 +426,12 @@ echo start /low /b run.bat >>part1.bat
 echo @echo off >run.bat
 echo set origpath=%%CD%% >>run.bat
 echo cd "%home_path%" >>run.bat
-echo git.exe add . -v >>run.bat
-echo git.exe commit -am "Backup for: %%date%% %%time%%" >>run.bat
-echo git.exe push %servername% master >>run.bat
+echo start /low /b /wait git.exe add . -v >>run.bat
+echo start /low /b /wait git.exe commit -am "Backup for: %%date%% %%time%%" >>run.bat
+echo start /low /b /wait git.exe push %servername% master >>run.bat
 echo cd %%origpath%% >>run.bat 
 echo Set WshShell = CreateObject("WScript.Shell") >runner.vbs
-echo WshShell.Run chr(34) ^& '"%home_path%\%servername%_%username%\run.bat"' ^& Chr(34),0 >>runner.vbs
+echo WshShell.Run chr(34) ^& "%home_path%\%servername%_%username%\run.bat" ^& Chr(34),0 >>runner.vbs
 echo Set WshShell = Nothing >>runner.vbs
 %shfile%
 del %0
