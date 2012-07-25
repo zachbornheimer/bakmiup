@@ -58,7 +58,7 @@ ENDCOMMAND;
     $df = system($cmd);
     ob_end_clean();
     if ($df == 100) {
-        print "Fatal Error: you're all out of space. Error Code: 1050";
+        print "Fatal Error: you're all out of space. <a href='http://zysys.org/wiki/index.php/Bakmiup:_Error_Codes#Error_1050'>Error Code: 1050</a>";
         if ($die)
             exit;
     }
@@ -69,7 +69,7 @@ ENDCOMMAND;
     $df = system($cmd);
     ob_end_clean();
     if ($df == 100) {
-        print "Fatal Error: you're all out of space. Error Code: 1095";
+        print "Fatal Error: you're all out of space. <a href='http://zysys.org/wiki/index.php/Bakmiup:_Error_Codes#Error_1095'>Error Code: 1095</a>";
         if ($die)
             exit;
     }
@@ -81,7 +81,7 @@ ENDCOMMAND;
     $df = system($cmd);
     ob_end_clean();
     if ($df == 100) {
-        print "Fatal Error: you're all out of space. Error Code: 1257";
+        print "Fatal Error: you're all out of space. <a href='http://zysys.org/wiki/index.php/Bakmiup:_Error_Codes#Error_1257'>Error Code: 1257</a>";
         if ($die)
             exit;
     }
