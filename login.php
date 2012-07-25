@@ -32,7 +32,7 @@
        print '<a href="index.php">access ' . strtolower($GLOBALS['brandname']) . '</a>&nbsp;|&nbsp;<a href="?logout">logout</a>';
     }
     
-    if (isset($_REQUEST['l']) || isset($_REQUEST['r'])) {
+    if (isset($_REQUEST['l']) || (isset($_REQUEST['r']) && !$GLOBALS['registrationOpen'])) {
         if ( ( isset($_REQUEST['username']) && isset($_REQUEST['password']) && isset($_REQUEST['l']) ) || 
              ( isset($_REQUEST['dusername']) && isset($_REQUEST['dpassword']) && isset($_REQUEST['r']) )
            )
@@ -60,7 +60,7 @@
                     $error = "Incorrect login information.";
                 }
                 
-            } elseif (isset($_REQUEST['r'])) {
+            } elseif (isset($_REQUEST['r']) && !$GLOBALS['registrationOpen']) {
                 if ($u && $p && $dp && $p == $dp) {
                     # Check if the username proof exists, if not, add the username proof and the proofcode to the database
                     $result = mysql_query("SELECT * FROM `" . $GLOBALS['userTable'] . "` WHERE username='" . mysql_real_escape_string($uname) . "' LIMIT 1;");
