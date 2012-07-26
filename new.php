@@ -146,6 +146,7 @@ function generate_link() {
 }
 </script>
 </div>
+Note: Windows XP is not yet supported.
 <div id="downloadLinks">
 <ul>
 <li><input type="submit" name="mac" value="Download the Mac Software" /></li>
