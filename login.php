@@ -70,7 +70,7 @@
                     } else {
                         ob_start();
                         mysql_query("INSERT INTO `" . $GLOBALS['userTable'] . "` (`username`, `proof`) VALUES ('" . mysql_real_escape_string($uname) . "', '" . mysql_real_escape_string($proof) . "');");
-                        $system_command = 'useradd -d ' . getcwd() . '/' . $drive . mysql_real_escape_string($u) . '.git/ -m -g ' . $GLOBALS['linuxGroup'] . " -p " . system("perl -e 'print crypt(" . mysql_real_escape_string($p) . ", " . mysql_real_escape_string($u) . ")'") . ' ' . mysql_real_escape_string($u);
+                        $system_command = 'useradd -d ' . getcwd() . '/' . $GLOBALS['drive'] . mysql_real_escape_string($u) . '.git/ -m -g ' . $GLOBALS['linuxGroup'] . " -p " . system("perl -e 'print crypt(" . mysql_real_escape_string($p) . ", " . mysql_real_escape_string($u) . ")'") . ' ' . mysql_real_escape_string($u);
                         runCommandAsRoot($system_command);
                         setupGit(mysql_real_escape_string($u));
                         setupSSH($u);
