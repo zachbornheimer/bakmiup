@@ -50,8 +50,8 @@
             $proof = shell_exec(escapeshellcmd('perl ../ragnarok/Ragnarok.pm --generate=upass --username="' . $u . '" --password="' . $p . '"'));
 	    if (isset($_REQUEST['l'])) {
                 # Check if the proof  matches a record
-                $result = mysql_query("SELECT * FROM `" . $GLOBALS['userTable'] . "` WHERE proof='" . mysql_real_escape_string($proof) . "' LIMIT 1;");
-                $row = mysql_fetch_assoc($result);
+                $result = mysqli_query($link, "SELECT * FROM `" . $GLOBALS['userTable'] . "` WHERE proof='" . mysqli_real_escape_string($link, $proof) . "' LIMIT 1;");
+                $row = mysqli_fetch_assoc($result);
                 if ($row) {
                     setcookie($GLOBALS['cookieName'], $u);
                     setcookie($GLOBALS['cookieName_auth'], $uname);
@@ -63,16 +63,16 @@
             } elseif (isset($_REQUEST['r']) && !$GLOBALS['registrationOpen']) {
                 if ($u && $p && $dp && $p == $dp) {
                     # Check if the username proof exists, if not, add the username proof and the proofcode to the database
-                    $result = mysql_query("SELECT * FROM `" . $GLOBALS['userTable'] . "` WHERE username='" . mysql_real_escape_string($uname) . "' LIMIT 1;");
-                    $row = mysql_fetch_assoc($result);
+                    $result = mysqli_query($link, "SELECT * FROM `" . $GLOBALS['userTable'] . "` WHERE username='" . mysqli_real_escape_string($link, $uname) . "' LIMIT 1;");
+                    $row = mysqli_fetch_assoc($result);
                     if ($row) {
                         print "Username Exists.";
                     } else {
                         ob_start();
-                        mysql_query("INSERT INTO `" . $GLOBALS['userTable'] . "` (`username`, `proof`) VALUES ('" . mysql_real_escape_string($uname) . "', '" . mysql_real_escape_string($proof) . "');");
-                        $system_command = 'useradd -d ' . getcwd() . '/' . $drive . mysql_real_escape_string($u) . '.git/ -m -g ' . $GLOBALS['linuxGroup'] . " -p " . system("perl -e 'print crypt(" . mysql_real_escape_string($p) . ", " . mysql_real_escape_string($u) . ")'") . ' ' . mysql_real_escape_string($u);
+                        mysqli_query("INSERT INTO `" . $GLOBALS['userTable'] . "` (`username`, `proof`) VALUES ('" . mysqli_real_escape_string($link, $uname) . "', '" . mysqli_real_escape_string($link, $proof) . "');");
+                        $system_command = 'useradd -d ' . getcwd() . '/' . $GLOBALS['drive'] . mysqli_real_escape_string($link, $u) . '.git/ -m -g ' . $GLOBALS['linuxGroup'] . " -p " . system("perl -e 'print crypt(" . mysqli_real_escape_string($link, $p) . ", " . mysqli_real_escape_string($link, $u) . ")'") . ' ' . mysqli_real_escape_string($link, $u);
                         runCommandAsRoot($system_command);
-                        setupGit(mysql_real_escape_string($u));
+                        setupGit(mysqli_real_escape_string($link, $u));
                         setupSSH($u);
                         $message = "Registered.";
                         ob_end_clean();
