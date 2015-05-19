@@ -42,9 +42,9 @@ function setup() {
         updaterSetup();
     }
     echo 'Setting up the database, if necessary...<br />';
-    mysql_query('CREATE DATABASE IF NOT EXISTS ' . $GLOBALS['mysql_database']);
+    mysqli_query($link, 'CREATE DATABASE IF NOT EXISTS ' . $GLOBALS['mysql_database']);
     echo 'Setting up users table, if necessary...<br />';
-    mysql_select_db($GLOBALS['mysql_database']); 
+    mysqli_select_db($link, $GLOBALS['mysql_database']); 
     setupTable("userTable");
     echo "&nbsp;&nbsp;&nbsp;&nbsp;...done.";
     die;
@@ -286,7 +286,7 @@ function setupTable($table) {
 function setupUsersTable() {
     # http: //www.daniweb.com/web-development/php/threads/99756/check-if-mysql-table-exists
     $sql = 'SELECT * FROM ' . $GLOBALS["userTable"] . ';';
-    $result = @mysql_query($sql);
+    $result = @mysqli_query($link, $sql);
     if (!$result) {
         $sql = 'CREATE TABLE `' . $GLOBALS['userTable'] . '` (
                `userid` bigint NOT NULL AUTO_INCREMENT PRIMARY KEY,
@@ -294,7 +294,7 @@ function setupUsersTable() {
                `proof` longtext NOT NULL
                ) COMMENT="";';
 
-        mysql_query($sql) or die(mysql_error());
+        mysqli_query($sql) or die(mysqli_error());
     }
 }
 

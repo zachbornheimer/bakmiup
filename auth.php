@@ -27,8 +27,8 @@
         exit;
     }
     if (isset($_COOKIE[$GLOBALS['cookieName_auth']])) {
-        $result = mysql_query('SELECT * FROM `' . $GLOBALS['userTable']  . '` WHERE username = ' . "'" . mysql_real_escape_string($_COOKIE[$GLOBALS['cookieName_auth']]) . "'" . ' LIMIT 1;');
-        $row = mysql_fetch_assoc($result);
+        $result = mysqli_query($link, 'SELECT * FROM `' . $GLOBALS['userTable']  . '` WHERE username = ' . "'" . mysqli_real_escape_string($link, $_COOKIE[$GLOBALS['cookieName_auth']]) . "'" . ' LIMIT 1;');
+        $row = mysqli_fetch_assoc($result);
         if (!$row) {
             print '<script type="text/javascript">window.location="login.php"</script>';
         }
